@@ -319,7 +319,13 @@ module Host
           rescue ArgumentError
             logger.debug "invalid mac during parsing: #{attributes[:macaddress]}"
           end
-          base = base.where(:mac => macaddress)
+          mac_scope = base.where(:mac => macaddress)
+          identifier_scope = base.where(:identifier => name)
+          if mac_scope.empty? && identifier_scope.any?
+            base = identifier_scope
+          else
+            base = mac_scope
+          end
           if attributes[:virtual]
             base.virtual.where(:identifier => name)
           else
